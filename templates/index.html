@@ -1,0 +1,46 @@
+<html>
+        <head>
+                <title>CM2540 Coursework - Eilidh Southren 1513195</title>
+
+                        <style>
+                                body {
+                                        background-color: #ffe6e6;
+                                }
+
+                                div.main {
+                                        margin: 0px auto;
+                                        width: 75%;
+                                        background-color: white;
+                                        padding: 0px 40px 0px 40px;
+                                        
+                                }
+                        </style>
+        </head>
+        
+        <body>
+
+        <div class ="main">
+                <br />
+                <h1>RasProtect Security System</h1>
+
+                <br />
+                <h4> Welcome! </h4>
+                <br />
+                Images Captured Today - {{ date }} <br /><br />
+
+                {% for file in list %}
+			
+                        {% if file[:10] == date %}	
+                                <a href="{{ url_for('static', filename=file)}}", target="_blank">
+                                <img src = "{{ url_for('static', filename=file)}}", height=200, width=200/></a>
+                                {{ file }} <p /><p />
+                        {% endif %}
+                {% endfor %}
+
+                <br />
+                <br />
+                <h4>Eilidh Southren - 1513195<br />CM2540 Coursework </h4><br /><br />
+        </div>
+
+        </body>
+</html>
