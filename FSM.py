@@ -1,12 +1,18 @@
-# file: lab10_example3/Recogniser1234FSM.py
-# Eilidh Southren 1513195
-#
-#
-# Statement of Compliance
-#
-#
-#
+#!/usr/bin/python3
+# file: FSM.py
+# Eilidh Southren- 1513195
+
+
+#--------------------------------------------
 # 
+#   This script creates the FSM for the
+#   alarm system, which steps through 
+#   the activation sequence to turn the 
+#   alarm on or off.
+#   
+#   It also sets the colours of the LED matrix on the SenseHat.
+#
+
 
 import sense_hat
 import picamera
@@ -100,7 +106,6 @@ activatePause = [
     
 hat.set_pixels(deactivated)
 
-
 # Verify GPIO settings         
 try:
     import RPi.GPIO as GPIO
@@ -113,31 +118,24 @@ class FSM:
     def start(self):
         # Initial Alarm settings
         self.state = self.startState
-     
         self.lb = 'Alarm Deactivated'
         self.colour = 'red'
         self.activeCheck = False
 
 
-        
     # now prompt the FSM to step to its next state
     # return output prompted by this transition
     def step(self, inp):
         (s, o, lb, c, b) = self.getNextValues(self.state, inp, self.lb, self.colour, self.activeCheck)
         self.state = s
-       
         self.lb = lb
         self.colour = c
-        self.activeCheck = b
-       
-            
+        self.activeCheck = b   
 
 class ArrowFSM(FSM):
     # define start state for FSM
     startState = 'initial'
-
     
-  
     def getNextValues(self, state, inp, lb, col, check):
 
         # States:   Initial 
@@ -146,7 +144,7 @@ class ArrowFSM(FSM):
         #   left->  d3
         #   right-> waiting
         #
-        #
+        
         
             if state == 'initial':
                 if check == False: 
@@ -169,13 +167,13 @@ class ArrowFSM(FSM):
                         hat.set_pixels(inputSequenceActivate)
                         return ('d2', None, 'Alarm Deactivated: Waiting for User Input', 'red', False)
                     else:
-                        return ('d1', None, 'Alarm Deactivated: Waiting for User Input', 'red', False)
+                        return ('initial', None, 'Alarm Deactivated: Waiting for User Input', 'red', False)
                 elif check == True:
                     if inp == 'Down':
                         hat.set_pixels(inputSequenceDeactivate)
                         return('d2', None, 'Alarm Activated: Waiting for User Input', 'green', True)
                     else:
-                        return('d1', None, 'Alarm Activated: Waiting for User input', 'green', True)
+                        return('initial', None, 'Alarm Activated: Waiting for User input', 'green', True)
 
             if state == 'd2':
                 if check == False: 
@@ -183,13 +181,13 @@ class ArrowFSM(FSM):
                         hat.set_pixels(inputSequenceActivate)
                         return ('d3', None, 'Alarm Deactivated: Waiting for User Input', 'red', False)
                     else:
-                        return ('d2', None, 'Alarm Deactivated: Waiting for User Input', 'red', False)
+                        return ('initial', None, 'Alarm Deactivated: Waiting for User Input', 'red', False)
                 elif check == True:
                     if inp == 'Left':
                         hat.set_pixels(inputSequenceDeactivate)
                         return('d3', None, 'Alarm Activated: Waiting for User Input', 'green', True)
                     else:
-                        return('d2', None, 'Alarm Activated: Waiting for User input', 'green', True)
+                        return('initial', None, 'Alarm Activated: Waiting for User input', 'green', True)
 
             if state == 'd3':
                 if check == False: 
@@ -197,13 +195,13 @@ class ArrowFSM(FSM):
                         hat.set_pixels(activatePause)
                         return ('waiting', None, 'Alarm Activating,  please wait', 'purple', False)
                     else:
-                        return ('d3', None, 'd3 Alarm Dectivated: Waiting for User Input', 'red', False)
+                        return ('initial', None, 'd3 Alarm Dectivated: Waiting for User Input', 'red', False)
                 elif check == True:
                     if inp == 'Right':
                         hat.set_pixels(deactivated)
                         return('initial', None, 'Alarm Deactivated: Waiting for User Input', 'red', False)
                     else:
-                        return('d3', None, 'Alarm Activated: Waiting for User Input', 'green', True)
+                        return('initial', None, 'Alarm Activated: Waiting for User Input', 'green', True)
                 
                      
             # if any keys are pressed in 'triggered' or 'transitioning' state, do nothing   

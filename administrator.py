@@ -1,17 +1,33 @@
 #!/usr/bin/python3
-# file: lab10_example3/lab10_example3.py
+# file: administrator.py
+# Eilidh Southren - 1513195
+
+#-----------------------------------------------------------
+#
+#   --Statement of Compliance--
+# 
+#   All client specifications met and functioning. 
+#
+#   This script creates the GUI interface for the 
+#   RasProtect security system. 
+#
+#   It also sets up the IR sensor, camera, and event
+#   handlers for keyboard input.
+#
 
 from tkinter import *
 from FSM import *
+from sendEmail import *
 from sense_hat import SenseHat
 import subprocess
 import time
 import datetime
 import os
 
+# Set activation time delay (60000 = 60 seconds)
+delay = 5000
 
 class GUI(Tk):
-
 
     # check SenseHat pins authorisation
     try:
@@ -24,22 +40,6 @@ class GUI(Tk):
     # Set up Sensehat pins for IR Sensor
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(33, GPIO.IN)
-
-
-#
-#    --->>  To DO List <<---
-#
-#    
-
-# 
-# 
-# - when alarm is activated, send tweet and email (include date/time)
-# 
-
-#
-#   Bonus Round:
-#       - Add Countdown to activation
-#       - Animated Intro
   
     # Take a picture and assign today's date as filename
     def takePic(self):
@@ -61,7 +61,15 @@ class GUI(Tk):
         if self.fsm.activeCheck == True:
             hat.set_pixels(blue)
             self.label2.config(text='ALARM', background='blue')
-          # self.sendTweet()
+           
+            # send tweet
+            # Program opened from Python 2.7 due to version errors with Tweepy Module
+            cmd = 'python twitterHandling.py'
+            subprocess.Popen(cmd, shell=True)
+
+             # send email method from sendEmail.py script
+            sendEmail()
+            
             # Call Picture Taking Method
             self.after(10, self.takePic)
             # after 4 seconds, call activate method to revert to active state  
@@ -101,7 +109,7 @@ class GUI(Tk):
 
         # if the server is currently not running
         if not self.serverCheck:            
-            cmd = 'python /home/pi/Desktop/Coursework/flask_server.py'
+            cmd = 'python flask_server.py'
             subprocess.Popen(cmd, shell=True)
             self.buttonServer.config(text="Turn Server Off")
             self.serverCheck = True
@@ -117,8 +125,9 @@ class GUI(Tk):
         self.fsm.step(str(direction))
         self.label2.config(text=self.fsm.lb, background=self.fsm.colour)
         if self.fsm.state == 'waiting':
+            
           # specify delay for activation (60 seconds = 60000)
-          self.after(2000, self._activate)
+            self.after(delay, self._activate)
 
     
             
@@ -135,7 +144,6 @@ class GUI(Tk):
         pid = subprocess.call(cmd, shell=True)
 
         
-        
         #keyboard input
         self.bind('<Key>', self.key_event_handler)
 
@@ -144,6 +152,7 @@ class GUI(Tk):
         # and start the FSM
         self.fsm.start()
         self.resizable(False, False)
+        
         # Start Server/Delete pictures Buttons
         self.adminButtonsFrame = Frame(self)
         self.adminButtonsFrame.columnconfigure(0, weight=1)
@@ -204,7 +213,7 @@ class GUI(Tk):
         # setup IR event handling
         GPIO.add_event_detect(33, GPIO.RISING, callback=self.IRevent)
 
-
+    # event handling for SenseHat joystick and arrow keys
     def key_event_handler(self, event):
        if event.keysym == 'Up':
            self._JoystickPress('Up')   
